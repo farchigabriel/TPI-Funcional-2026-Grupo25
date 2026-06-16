@@ -205,7 +205,7 @@ En nuestra opinión, Scala resulta más legible para alguien que recién aprende
 
 Estudiar Scala para este trabajo fue una experiencia interesante porque nos permitió ver cómo los conceptos del paradigma funcional que aprendimos en Lisp aparecen también en un lenguaje moderno y ampliamente usado en la industria.
 
-Lo que más nos llamó la atención fue el pattern matching de Scala, que reemplaza al cond de Lisp de una forma muy expresiva y clara. Poder escribir case (List(1,0,0), List(_,_,1)) => ... y que Scala entienda exactamente qué estructura estamos comparando nos pareció muy poderoso.
+Lo que más nos llamó la atención fue el pattern matching de Scala, que reemplaza al cond de Lisp de una forma muy expresiva y clara. Poder escribir case (List(1,0,0), List(_ ,_ ,1)) => ... y que Scala entienda exactamente qué estructura estamos comparando nos pareció muy poderoso.
 
 También notamos que Scala es más estricto en los tipos: al declarar List[Int] el compilador nos avisa si intentamos meter algo incorrecto, mientras que en Lisp eso solo se descubre en tiempo de ejecución.
 

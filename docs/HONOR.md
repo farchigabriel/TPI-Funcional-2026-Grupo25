@@ -54,7 +54,7 @@ El uso de la IA para asistencia en sintaxis o deteccion de errores no esta penal
 
 **Declaracion Jurada:** Al subir este archivo al repositorio, declaro bajo compromiso de honor que las marcas anteriores reflejan fielmente mi participacion y la naturaleza del desarrollo de este trabajo practico. Entiendo que la catedra cruzara esta declaracion con la correcta clasificacion en comentarios del codigo y con mi desempeno en la defensa oral/video.
 
-## Integrante:  - Usuario GitHub: ``
+## Integrante:Valentina Barrientos  - Usuario GitHub: `valentinabarrientoss06`
 
 ### 1. Codigo en Common Lisp (Fase 1 y 2)
 

@@ -187,7 +187,7 @@ object Semaforo {
 
 Elegimos el object porque nos da un contenedor para las funciones. Las funciones transicion y timer son puras: reciben datos, devuelven datos, sin modificar nada.
 
-2. Comparen la manipulación de listas en Scala (métodos como .map o .filter) contra las funciones de orden superior de Common Lisp. ¿Cuál resulta más legible y por qué?
+Comparen la manipulación de listas en Scala (métodos como .map o .filter) contra las funciones de orden superior de Common Lisp. ¿Cuál resulta más legible y por qué?
 
 Tanto Scala como Common Lisp permiten trabajar con listas usando funciones de orden superior, es decir, funciones que reciben otras funciones como argumento. Sin embargo, la sintaxis y la forma de expresarlo es diferente.
 En Common Lisp, las funciones de orden superior principales son mapcar y reduce. Por ejemplo, en el código del trabajo usamos reduce para sumar los tiempos del ciclo

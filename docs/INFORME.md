@@ -5,8 +5,10 @@
 
 **Integrantes:**
 - 
-- Juan Gabriel Farchi - Github: `farchigabriel`
+- Juan Gabriel Farchi — Github: `farchigabriel` 
 - Mario Daniel Rodas — GitHub: `mariorodas1804`
+- Acevedo Horacio — GitHub: `acevedoHoracio2026`
+- Barrientos Valentina — GitHub: `valentinabarrientoss06`
 
 **Tema investigado:** Sistema de Semaforos Inteligentes y Analisis Comparativo de Paradigmas.
 

@@ -32,7 +32,7 @@ TPI-Funcional-2026-Grupo25/
 
 ├── comparativa/
 
-│   ├── solucion.lisp
+│   ├── .gitkeep
 
 │   └── solucion.scala
 
@@ -44,7 +44,6 @@ TPI-Funcional-2026-Grupo25/
 
 │   └── HONOR.md
 
-└── README.md
 ---
 
 ## 🔤 Lenguaje Asignado — Fase 3
@@ -55,7 +54,7 @@ TPI-Funcional-2026-Grupo25/
 
 ## 🎬 Video de Defensa
 
-[)
+
 
 ---
 

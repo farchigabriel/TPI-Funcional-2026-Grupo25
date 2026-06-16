@@ -11,7 +11,9 @@
 ## 👥 Integrantes
 
   **Farchi Juan Gabriel** User: **farchigabriel**
-
+  **Barrientos Valentina** User: **valentinabarrientoss06**
+  **Rodas Mario** User: **mariorodas1804**
+  **Acevedo Horacio** User: **acevedoHoracio2026**
 
 ## 🗂️ Estructura del Repositorio
 TPI-Funcional-2026-Grupo25/

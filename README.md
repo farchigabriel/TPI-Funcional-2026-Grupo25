@@ -15,7 +15,7 @@
   
   **Barrientos Valentina** User: **valentinabarrientoss06**
  
-  **Rodas Mario** User: **mariorodas1804**
+  **Rodas Mario Daniel** User: **mariorodas1804**
  
   **Acevedo Horacio** User: **acevedoHoracio2026**
 

@@ -4,9 +4,11 @@ Trabajo Practico Integrador de la materia Paradigmas de Programacion. Armamos un
 
 ## Integrantes
 
-- [Integrante 1] - GitHub: `[usuario]`
+- Farchi Juan Gabriel - GitHub: `farchigabriel`
 - [Integrante 2] - GitHub: `[usuario]`
 - Mario Daniel Rodas - GitHub: `mariorodas1804`
+- [Integrante 2] - GitHub: `[usuario]`
+
 
 ## Estructura
 

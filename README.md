@@ -1,14 +1,7 @@
 # 🚦 TPI-Funcional-2026-Grupo25
 
-```
-  ┌──────┐    ┌──────┐    ┌──────┐
-  │  🔴  │    │      │    │      │
-  │      │    │  🟡  │    │      │
-  │      │    │      │    │  🟢  │
-  └──┬───┘    └──┬───┘    └──┬───┘
-     │            │            │
-─────┴────────────┴────────────┴─────
-```
+![Portada](docs/portada.png)
+
 # Sistema de Semáforos Inteligentes
 **Materia:** Paradigmas y Lenguajes
 **Año:** 2026

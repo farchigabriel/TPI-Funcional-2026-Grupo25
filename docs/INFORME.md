@@ -177,29 +177,38 @@ Ver carpeta `/comparativa/solucion.[ext]`.
 ### Preguntas teoricas 
 
 ¿Cómo estructuraron el semáforo? ¿Usaron una clase tradicional, un object (Singleton), o case classes? Justifiquen desde el diseño funcional. 
+
 Usamos funciones sueltas dentro de un object (Singleton). En Scala, un object es una clase de instancia única, similar a una clase con todos métodos estáticos en Java. Esto nos permite agrupar las funciones sin necesidad de instanciar nada. 
+
 object Semaforo {
   def transicion(...) = ...
   def timer(...) = ...
 }
+
 Elegimos el object porque nos da un contenedor para las funciones. Las funciones transicion y timer son puras: reciben datos, devuelven datos, sin modificar nada.
 
 2. Comparen la manipulación de listas en Scala (métodos como .map o .filter) contra las funciones de orden superior de Common Lisp. ¿Cuál resulta más legible y por qué?
 
 Tanto Scala como Common Lisp permiten trabajar con listas usando funciones de orden superior, es decir, funciones que reciben otras funciones como argumento. Sin embargo, la sintaxis y la forma de expresarlo es diferente.
 En Common Lisp, las funciones de orden superior principales son mapcar y reduce. Por ejemplo, en el código del trabajo usamos reduce para sumar los tiempos del ciclo
+
 (defun cal_ciclo(tiempo)
     (reduce #'+ tiempo))
 
 En Scala, los métodos .map, .filter y .reduce son métodos de la propia lista, lo que hace la sintaxis más fluida y encadenada. El equivalente de cal_ciclo en Scala sería
+
 def calCiclo(tiempos: List[Int]): Int = tiempos.reduce(_ + _)
+
 En nuestra opinión, Scala resulta más legible para alguien que recién aprende, porque la sintaxis de punto (lista.map(...)) es más parecida al lenguaje natural y a lo que ya conocemos de otros lenguajes. En Lisp, el anidamiento de paréntesis puede dificultar la lectura cuando las expresiones se vuelven más complejas.
 
 ### Conclusion del grupo
 
 Estudiar Scala para este trabajo fue una experiencia interesante porque nos permitió ver cómo los conceptos del paradigma funcional que aprendimos en Lisp aparecen también en un lenguaje moderno y ampliamente usado en la industria.
+
 Lo que más nos llamó la atención fue el pattern matching de Scala, que reemplaza al cond de Lisp de una forma muy expresiva y clara. Poder escribir case (List(1,0,0), List(_,_,1)) => ... y que Scala entienda exactamente qué estructura estamos comparando nos pareció muy poderoso.
+
 También notamos que Scala es más estricto en los tipos: al declarar List[Int] el compilador nos avisa si intentamos meter algo incorrecto, mientras que en Lisp eso solo se descubre en tiempo de ejecución.
+
 La dificultad principal fue entender la sintaxis nueva y cuándo usar def, val, object, etc. Pero una vez comprendido eso, traducir la lógica desde Lisp fue bastante directo, lo que nos demuestra que los conceptos del paradigma funcional son universales y se aplican más allá del lenguaje específico.
 
 ## 5. Bibliografia

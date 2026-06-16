@@ -37,10 +37,10 @@
 
 ;;cond cubre 3 casos de pruebas + la transicion no es valida (consigna)
 ;;utilizacion de apostrofe para el simbolo y comillas dobles para el string
-;;utilizacion del cond y dentro un and para realizar la comparaciones (color actual y color destino) color-actual y cambiar-a son los parametros, se utilizan como comparacion contra los literales (simbolos), list para armar la lista de salida
+;;utilizacion del cond y dentro un and para realizar la comparaciones (color actual y color destino) color-actual y cambiar-a son los parametros, 
+;;se utilizan como comparacion contra los literales (simbolos), list para armar la lista de salida
 ;;cuando: color-actual = 'en-rojo Y cambiar-a = 'verde  devolviendo: (list 'en-rojo "cambiar-a-verde")
 ;;si todos fallan caemos en la ultima rama
-;;opciones: utilizar 'format', pero cond mas legible e entendible
 
 (defun transicion (color-actual cambiar-a)
     (cond ((and (eq color-actual 'en-rojo) (eq cambiar-a 'verde)) (list 'en-rojo "cambiar-a-verde"))
@@ -56,12 +56,10 @@
 ;; IMPACTO: no destructiva
 ;; ============================================================
 
-;;lista de tiempos como parametro, para que resulte mas funcional
 ;;reglas: rojo es 90s, verde 120s y amarillo 6s (ciclo completo 216s (duracion-ciclo))
-;;condicion con 3 tramos: rojo (0,90), verder (90,210) y amarillo (210,216)
+;;condicion con 3 tramos: rojo (0,90), verde (90,210) y amarillo (210,216)
 ;;comparacion con tramos (el mod del timestamp con duracion-ciclo como parametro deberia dar un numero entre 0 y 215)
 ;;pos < 90 entonces es rojo ; pos < 90(rojo) + 120(verde) entonces es verde; pos >= 210 entonces es amarillo --operaciones aritmeticas--
-;;utilizar let para no recalcular?
 
 (defun timer (timestamp tiempos)
     (let ((pos (mod timestamp (duracion-ciclo tiempos))))
@@ -69,7 +67,7 @@
               ((< pos (+ (car tiempos) (cadr tiempos))) 'verde)
               (t 'amarillo))))
 
-;;let para guardar pos de manera local (el mod entre timestamp y la duracion-ciclo) para no calcularlo 3 veces
+;;let para guardar pos como variable local (el mod entre timestamp y la duracion-ciclo) para no calcularlo 3 veces
 ;;Cambio: no utilizacion del 'caddr tiempos = 6' como tercer comparativo porque por logica si no es verde o rojo es amarillo porque la comparacion abarca todo el ciclo
 ;;let es un binding asigna un nombre a un valor inmutable. Ademas es funcion pura porque recibe timestamp, no toca el reloj
 
@@ -104,10 +102,8 @@
 ;; ============================================================
 
 ;; recibe la duracion del ciclo (entero, en segundos)
-;; evalua si esta dentro del rango optimo segun ingenieria de trafico (35-150s)
+;; evalua si esta dentro del rango optimo (35-150s)
 ;; devuelve una lista con simbolo + mensaje explicativo
-;; consideracion psicologica del conductor (consigna R4b)
-;; with nuestras reglas actuales (90+120+6=216) cae en NO optimo
 
 (defun recomendacion-ciclo (duracion)
     (cond ((and (>= duracion 35) (<= duracion 150))
@@ -122,11 +118,10 @@
 ;; IMPACTO: no destructiva
 ;; ============================================================
 
-;; recibe los minutos a planificar + la lista de tiempos del ciclo
+;; recibe los minutos + la lista de tiempos del ciclo
 ;; convierte minutos a segundos (* minutos 60) y divide por la duracion del ciclo
 ;; truncate corta decimales para devolver ciclos COMPLETOS
 ;; ejemplo: 15 minutos = 900 seg, 900/216 = 4.16, truncate -> 4 ciclos completos
-;; aplica composicion con duracion-ciclo (no recalculamos la suma)
 
 (defun ciclos-por-tiempo (minutos tiempos)
     (truncate (/ (* minutos 60) (duracion-ciclo tiempos))))
@@ -141,9 +136,8 @@
 ;; recibe la lista de tiempos del ciclo
 ;; devuelve lista plana de 3 porcentajes en orden fijo: (rojo verde amarillo)
 ;; usa car/cadr/caddr para extraer cada tiempo y dividir por la duracion total
-;; (* 100.0 ...) fuerza float para tener decimales (sin el .0 daria racionales)
+;; (* 100.0 ...) usa float para tener decimales (sin el .0 daria racionales)
 ;; ejemplo con (90 120 6): (41.66 55.55 2.77)
-;; convencion: el orden de salida sigue el orden del config (rojo verde amarillo)
 
 (defun distribucion-porcentual (tiempos)
     (let ((total (duracion-ciclo tiempos)))
@@ -329,14 +323,6 @@
 ;; ============================================================
 
 ;; igual que timer pero con tramos intermitentes intercalados
-;; ciclo:
-;;   [0, r)               -> rojo
-;;   [r, r+i)             -> amarillo-intermitente (transicion rojo->verde)
-;;   [r+i, r+i+v)         -> verde
-;;   [r+i+v, r+i+v+i)     -> amarillo-intermitente (transicion verde->amarillo)
-;;   [r+i+v+i, r+i+v+i+a) -> amarillo
-;;   resto                -> amarillo-intermitente (transicion amarillo->rojo)
-;; let para no recalcular sumas
 
 (defun timer-v2 (timestamp tiempos)
     (let ((pos (mod timestamp (duracion-ciclo-v2 tiempos)))

@@ -14,7 +14,7 @@
 
 ---------------------------------------------------------------------------------------------------
 
-## 1. Fundamentos del diseno funcional adoptado
+## 1. Fundamentos del diseño funcional adoptado
 ### 1.1 Entorno de desarrollo
 
 Se utilizo CLISP 2.49 como implementacion de referencia de Common Lisp y Sublime Text 3 como editor, ambos utilizados por la catedra.

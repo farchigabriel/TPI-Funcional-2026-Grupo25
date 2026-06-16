@@ -5,7 +5,7 @@
 
 **Integrantes:**
 - 
-- 
+- Juan Gabriel Farchi - Github: "farchigabriel"
 - Mario Daniel Rodas — GitHub: `mariorodas1804`
 
 **Tema investigado:** Sistema de Semaforos Inteligentes y Analisis Comparativo de Paradigmas.

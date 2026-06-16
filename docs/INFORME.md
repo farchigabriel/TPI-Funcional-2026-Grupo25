@@ -36,7 +36,7 @@ Se adopto el patron **"nucleo puro / borde impuro"**:
 |               Tipo                  |          Funciones            |
 |-------------------------------------|-------------------------------|
 | **Puras** (sin efectos colaterales) | `transicion`, `timer`, `duracion-ciclo`, `recomendacion-ciclo`, `ciclos-por-tiempo`, `distribucion-porcentual` |
-| **Impuras** (I/O)                   | `informe` (logging)           |
+| **Impuras** (I/O)                   | `informe` (logging a pantalla), `informe-archivo` (escritura a archivo) |
 
 Toda lectura del reloj del sistema (`get-universal-time`) ocurre **en el borde** (driver/REPL) y el valor se pasa como argumento a `timer`. Esto preserva la pureza de `timer`: dado un mismo timestamp, siempre devuelve el mismo color, independientemente de cuando se ejecute.
 
@@ -83,11 +83,68 @@ La alternativa, `cl-json`, tambien es valida pero el problema es que en nuestro 
 
 Otro punto a favor de `local-time`: introduce el tipo `timestamp` propio, que es bastante robusto. Si en algun momento el sistema se extiende a manejar zonas horarias o formatos distintos, la libreria ya lo cubre sin tener que cambiar el resto del codigo. No es algo que necesitamos hoy, pero es buen seguro a futuro. (Lo investigamos y cubrimos los casos con Claude)
 
-La integracion con la libreria se hace via Quicklisp, que es el gestor de paquetes estandar del ecosistema Common Lisp.
+La integracion con la libreria se hace via Quicklisp, que es el gestor de paquetes estandar del ecosistema Common Lisp. En el codigo se carga al inicio del archivo con `(ql:quickload "local-time")` y se utiliza dentro de `informe` para convertir el epoch a fecha legible. La modificacion final fue:
+
+```lisp
+(defun informe (timestamp color-anterior color-nuevo)
+    (format t "Tiempo ~A: la luz ha cambiado de ~A a ~A~%"
+        (local-time:format-timestring nil
+            (local-time:unix-to-timestamp timestamp)
+            :format '((:year 4) "-" (:month 2) "-" (:day 2) " "
+                      (:hour 2) ":" (:min 2) ":" (:sec 2)))
+        color-anterior
+        color-nuevo))
+```
+
+El cambio queda quirurgico: solo `informe` se ve afectada, el resto del nucleo funcional no toca una linea.
 
 ------------------------------------------------------------------------------------------------------
 
-## 3. Bitacora de bugs de depuracion
+## 3. Iteracion 2 (extensiones)
+
+Tomamos la decision de abordar las dos extensiones que propone la consigna en la seccion "Iteracion 2", aunque no son estrictamente obligatorias para aprobar. Lo hicimos para reforzar la defensa oral y mostrar que entendimos a fondo el modelo.
+
+Para no romper el codigo de Fase 1 (que el evaluador puede correr con los ejemplos QA del R7), agregamos las extensiones como funciones paralelas con sufijo `-v2`. Conviven con las originales en el mismo archivo.
+
+### Extension 1 — Intermitencia de seguridad
+
+Reciclamos la idea del predicado `intermitente` del codigo del companero (que devuelve t si los segundos son menores o iguales a 3) y la incorporamos como funcion aparte. Despues extendimos el modelo de `timer` para incluir el estado `'amarillo-intermitente` entre cada par de cambios:
+
+```
+rojo (90s) → amarillo-intermitente (3s) → verde (120s) → amarillo-intermitente (3s) → amarillo (6s) → amarillo-intermitente (3s) → rojo
+```
+
+Duracion total del ciclo extendido: 90 + 120 + 6 + 3*3 = **225 segundos**.
+
+Las funciones nuevas son:
+- `intermitente`: predicado puro reciclado del codigo del companero.
+- `duracion-ciclo-v2`: suma los tres colores mas tres veces el intermitente.
+- `timer-v2`: identica filosofia que `timer` pero con seis tramos en lugar de tres.
+- `transicion-v2`: incluye seis transiciones validas que incluyen el paso por amarillo-intermitente.
+
+### Extension 2 — Persistencia del log en archivo
+
+La consigna propone modificar `informe` para que guarde el log en un archivo de texto plano. Para no perder la version de pantalla (que es lo que usamos en la demo R7), creamos `informe-archivo` como funcion paralela. Recibe una lista de eventos `((timestamp color-ant color-nuevo) ...)` y los vuelca al archivo `informe-ejecucion-semaforo.txt`.
+
+Lo interesante es como iteramos sobre la lista sin usar `loop` (prohibido). Usamos `mapcar` con una `lambda` para aplicar el `format` a cada evento. Esto cumple la consigna y demuestra orden superior real:
+
+```lisp
+(mapcar (lambda (evento)
+            (format stream "~A - Transicion: ~A -> ~A~%"
+                (local-time:format-timestring nil
+                    (local-time:unix-to-timestamp (car evento))
+                    :format '((:year 4) "-" (:month 2) "-" (:day 2) " "
+                              (:hour 2) ":" (:min 2) ":" (:sec 2)))
+                (cadr evento)
+                (caddr evento)))
+        datos)
+```
+
+Tambien reusamos `local-time` (la libreria de Fase 2) para que las fechas queden legibles en el archivo. Asi la Fase 2 y la Iteracion 2 se conectan en una sola pieza de codigo.
+
+------------------------------------------------------------------------------------------------------
+
+## 4. Bitacora de bugs de depuracion
 
 Esta seccion reune los cuatro errores que enfrentamos mientras armabamos el codigo. Los dejamos contados con cierto detalle porque, en cada caso, lo que aprendimos al resolverlos nos termino cambiando la forma de escribir el resto.
 
@@ -129,7 +186,7 @@ Cuando escribimos `''cambiar-a-verde''`, Lisp leyo dos veces `quote`, lo que dio
 
 La correccion es trivial cuando uno la entiende: usar `"cambiar-a-verde"` (un solo caracter `"` al inicio y otro al final). El editor mostro la diferencia recien cuando hicimos zoom y comparamos caracter por caracter.
 
-### Bug #Pesonal (Mario Rodas) — `Win32 error 267 (ERROR_DIRECTORY)` con paths que contienen espacios
+### Bug #4 (personal de Mario Rodas) — `Win32 error 267 (ERROR_DIRECTORY)` con paths que contienen espacios
 
 Este fue el bug mas raro de los que se me presento, y me/nos costo un buen rato de diagnostico porque no era un bug del codigo sino del entorno.
 
@@ -149,69 +206,93 @@ La leccion tiene dos partes. La primera, tecnica: en Windows, las rutas con espa
 
 -----------------------------------------------------------------------------------------------------
 
-### Presentacion del lenguaje (SCALA)
+## 5. Fase 3 — Reimplementacion en Scala
 
-Scala es un lenguaje de programación creado por Martin Odersky en 2003, que corre sobre la JVM (Java Virtual Machine). Su nombre viene de "Scalable Language", ya que fue diseñado para crecer con las necesidades del programador. Una de sus características más importantes es que combina el paradigma orientado a objetos con el funcional en un mismo lenguaje, lo que lo hace muy flexible.
+### 5.1 Presentacion del lenguaje
 
-Scala usa tipado estático, lo que significa que los tipos se verifican en tiempo de compilación, ayudando a detectar errores antes de ejecutar el programa.
+Scala es un lenguaje de programacion creado por Martin Odersky en 2003, que corre sobre la JVM (Java Virtual Machine). Su nombre viene de "Scalable Language", ya que fue disenado para crecer con las necesidades del programador. Una de sus caracteristicas mas importantes es que combina el paradigma orientado a objetos con el funcional en un mismo lenguaje, lo que lo hace muy flexible.
 
-### Industrias y áreas donde se usa:
-Big Data y procesamiento de datos: Apache Spark, la herramienta de procesamiento de datos más usada del mundo, está escrita en Scala.
+Scala usa tipado estatico, lo que significa que los tipos se verifican en tiempo de compilacion, ayudando a detectar errores antes de ejecutar el programa.
 
-Finanzas: por su robustez y rendimiento en sistemas de alta concurrencia.
-Backend y microservicios: gracias al framework Akka y Play Framework.
+### 5.2 Industrias y areas donde se usa
 
-### Empresas que lo utilizan:
-Twitter/X: usó Scala extensamente en su backend para manejar millones de tweets.
+- **Big Data y procesamiento de datos**: Apache Spark, la herramienta de procesamiento de datos mas usada del mundo, esta escrita en Scala.
+- **Finanzas**: por su robustez y rendimiento en sistemas de alta concurrencia.
+- **Backend y microservicios**: gracias al framework Akka y Play Framework.
 
-LinkedIn: lo usa para procesamiento de datos a gran escala.
+### 5.3 Empresas que lo utilizan
 
-Netflix: lo utiliza junto con Spark para analizar datos de usuarios.
+- **Twitter/X**: uso Scala extensamente en su backend para manejar millones de tweets.
+- **LinkedIn**: lo usa para procesamiento de datos a gran escala.
+- **Netflix**: lo utiliza junto con Spark para analizar datos de usuarios.
+- **Airbnb**: lo usa en su infraestructura de datos.
 
-Airbnb: lo usa en su infraestructura de datos.
+### 5.4 Reimplementacion de `transicion` y `timer`
 
-### Reimplementacion de `transicion` y `timer`
+Ver carpeta `/comparativa/solucion.scala`.
 
-Ver carpeta `/comparativa/solucion.[ext]`.
+Decidimos mantener coherencia con el modelo simbolico de la version Lisp del grupo: en lugar de representar los estados como vectores binarios `List(1,0,0)`, los modelamos como Algebraic Data Types (ADT) con `sealed trait` + `case object`. Asi cada estado (`EnRojo`, `EnVerde`, `EnAmarillo`) es un valor unico chequeado por el compilador, equivalente a los simbolos `'en-rojo`, `'en-verde`, `'en-amarillo` de Lisp.
 
-### Preguntas teoricas 
+### 5.5 Preguntas teoricas
 
-¿Cómo estructuraron el semáforo? ¿Usaron una clase tradicional, un object (Singleton), o case classes? Justifiquen desde el diseño funcional. 
+**¿Como estructuraron el semaforo? ¿Usaron una clase tradicional, un object (Singleton), o case classes? Justifiquen desde el diseno funcional.**
 
-Usamos funciones sueltas dentro de un object (Singleton). En Scala, un object es una clase de instancia única, similar a una clase con todos métodos estáticos en Java. Esto nos permite agrupar las funciones sin necesidad de instanciar nada. 
+Usamos un `object Semaforo` (Singleton) como contenedor de las funciones puras, mas `sealed trait` con `case object` para modelar los estados y colores. En Scala, un `object` es una clase de instancia unica, similar a una clase con todos metodos estaticos en Java. Esto nos permite agrupar las funciones sin necesidad de instanciar nada:
 
+```scala
 object Semaforo {
-  def transicion(...) = ...
-  def timer(...) = ...
+   sealed trait EstadoActual
+   case object EnRojo extends EstadoActual
+   case object EnVerde extends EstadoActual
+   case object EnAmarillo extends EstadoActual
+
+   sealed trait Color
+   case object Rojo extends Color
+   case object Verde extends Color
+   case object Amarillo extends Color
+
+   def transicion(colorActual: EstadoActual, cambiarA: Color): (EstadoActual, Any) = ...
+   def timer(timestamp: Int, tiempos: List[Int]): Color = ...
 }
+```
 
-Elegimos el object porque nos da un contenedor para las funciones. Las funciones transicion y timer son puras: reciben datos, devuelven datos, sin modificar nada.
+Elegimos el `object` porque nos da un contenedor para las funciones sin tener que instanciar nada. Las funciones `transicion` y `timer` son puras: reciben datos, devuelven datos, sin modificar nada.
 
-Comparen la manipulación de listas en Scala (métodos como .map o .filter) contra las funciones de orden superior de Common Lisp. ¿Cuál resulta más legible y por qué?
+Por que no usamos `case class`: las `case class` se usan cuando se necesitan estructuras de datos con campos. Los estados del semaforo no tienen campos internos (son simples etiquetas), asi que el `case object` es lo correcto. Es la equivalencia exacta a los simbolos de Lisp pero con la garantia de tipo estatico.
+
+**Comparen la manipulacion de listas en Scala (metodos como .map o .filter) contra las funciones de orden superior de Common Lisp. ¿Cual resulta mas legible y por que?**
 
 Tanto Scala como Common Lisp permiten trabajar con listas usando funciones de orden superior, es decir, funciones que reciben otras funciones como argumento. Sin embargo, la sintaxis y la forma de expresarlo es diferente.
-En Common Lisp, las funciones de orden superior principales son mapcar y reduce. Por ejemplo, en el código del trabajo usamos reduce para sumar los tiempos del ciclo
 
-(defun cal_ciclo(tiempo)
-    (reduce #'+ tiempo))
+En Common Lisp, las funciones de orden superior principales son `mapcar` y `reduce`. Por ejemplo, en nuestro codigo usamos `mapcar` con una lambda para volcar los eventos al archivo en la Iteracion 2:
 
-En Scala, los métodos .map, .filter y .reduce son métodos de la propia lista, lo que hace la sintaxis más fluida y encadenada. El equivalente de cal_ciclo en Scala sería
+```lisp
+(mapcar (lambda (evento)
+            (format stream "~A -> ~A~%" (car evento) (cadr evento)))
+        datos)
+```
 
-def calCiclo(tiempos: List[Int]): Int = tiempos.reduce(_ + _)
+En Scala, los metodos `.map`, `.filter` y `.reduce` son metodos de la propia lista, lo que hace la sintaxis mas fluida y encadenada. Por ejemplo, un equivalente conceptual seria:
 
-En nuestra opinión, Scala resulta más legible para alguien que recién aprende, porque la sintaxis de punto (lista.map(...)) es más parecida al lenguaje natural y a lo que ya conocemos de otros lenguajes. En Lisp, el anidamiento de paréntesis puede dificultar la lectura cuando las expresiones se vuelven más complejas.
+```scala
+datos.map(evento => s"${evento._1} -> ${evento._2}")
+```
 
-### Conclusion del grupo
+En nuestra opinion, Scala resulta mas legible para alguien que recien aprende, porque la sintaxis de punto (`lista.map(...)`) es mas parecida al lenguaje natural y a lo que ya conocemos de otros lenguajes. En Lisp, el anidamiento de parentesis puede dificultar la lectura cuando las expresiones se vuelven mas complejas. Pero hay un trade-off: cuando uno se acostumbra a la lectura prefija de Lisp, la regularidad de la sintaxis tambien tiene su belleza, porque todo es una llamada a funcion sin excepciones.
 
-Estudiar Scala para este trabajo fue una experiencia interesante porque nos permitió ver cómo los conceptos del paradigma funcional que aprendimos en Lisp aparecen también en un lenguaje moderno y ampliamente usado en la industria.
+### 5.6 Conclusion del grupo
 
-Lo que más nos llamó la atención fue el pattern matching de Scala, que reemplaza al cond de Lisp de una forma muy expresiva y clara. Poder escribir case (List(1,0,0), List(_,_,1)) => ... y que Scala entienda exactamente qué estructura estamos comparando nos pareció muy poderoso.
+Estudiar Scala para este trabajo fue una experiencia interesante porque nos permitio ver como los conceptos del paradigma funcional que aprendimos en Lisp aparecen tambien en un lenguaje moderno y ampliamente usado en la industria.
 
-También notamos que Scala es más estricto en los tipos: al declarar List[Int] el compilador nos avisa si intentamos meter algo incorrecto, mientras que en Lisp eso solo se descubre en tiempo de ejecución.
+Lo que mas nos llamo la atencion fue el pattern matching de Scala, que reemplaza al `cond` de Lisp de una forma muy expresiva y clara. Poder escribir `case (EnRojo, Verde) => ...` y que Scala entienda exactamente que estructura estamos comparando nos parecio muy poderoso. Ademas, el compilador chequea exhaustividad: si nos olvidamos un caso, nos avisa.
 
-La dificultad principal fue entender la sintaxis nueva y cuándo usar def, val, object, etc. Pero una vez comprendido eso, traducir la lógica desde Lisp fue bastante directo, lo que nos demuestra que los conceptos del paradigma funcional son universales y se aplican más allá del lenguaje específico.
+Tambien notamos que Scala es mas estricto en los tipos. Al declarar `sealed trait EstadoActual` y sus `case object`, el compilador garantiza que no podemos pasar un estado invalido. En Lisp eso solo se descubre en tiempo de ejecucion porque `'en-rojo` es un simbolo dinamico cualquiera.
 
-## 5. Bibliografia
+La dificultad principal fue entender la sintaxis nueva y cuando usar `def`, `val`, `object`, `trait`, `sealed`. Pero una vez comprendido eso, traducir la logica desde Lisp fue bastante directo, lo que nos demuestra que los conceptos del paradigma funcional son universales y se aplican mas alla del lenguaje especifico.
+
+------------------------------------------------------------------------------------------------------
+
+## 6. Bibliografia
 
 - ANSI Common Lisp HyperSpec — http://www.lispworks.com/documentation/HyperSpec/Front/index.htm
 - GNU CLISP Implementation Notes — https://clisp.sourceforge.io/impnotes/
@@ -220,5 +301,6 @@ La dificultad principal fue entender la sintaxis nueva y cuándo usar def, val, 
 - Peter Seibel, *Practical Common Lisp*, Apress, 2005 — http://www.gigamonkeys.com/book/
 - Paul Graham, *ANSI Common Lisp*, Prentice Hall, 1995
 - Catedra Paradigmas de Programacion 2026 — Consigna TPI v2.2.1 y Enunciado Semaforos v2.1.2
+- Scala Documentation — https://docs.scala-lang.org/
 - ¿Que es SCALA y por que lo usan las grandes empresas? - https://youtu.be/3-iXJepXkyY?si=lp8gTlTNn3FqG7OS
 - Scala 101: todo lo que necesitas saber para empezar - https://youtu.be/5Lc8ik9nnIk?si=cwTQxsO-yY19PPHi

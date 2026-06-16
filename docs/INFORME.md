@@ -157,13 +157,17 @@ Scala usa tipado estático, lo que significa que los tipos se verifican en tiemp
 
 ### Industrias y áreas donde se usa:
 Big Data y procesamiento de datos: Apache Spark, la herramienta de procesamiento de datos más usada del mundo, está escrita en Scala.
+
 Finanzas: por su robustez y rendimiento en sistemas de alta concurrencia.
 Backend y microservicios: gracias al framework Akka y Play Framework.
 
 ### Empresas que lo utilizan:
 Twitter/X: usó Scala extensamente en su backend para manejar millones de tweets.
+
 LinkedIn: lo usa para procesamiento de datos a gran escala.
+
 Netflix: lo utiliza junto con Spark para analizar datos de usuarios.
+
 Airbnb: lo usa en su infraestructura de datos.
 
 ### Reimplementacion de `transicion` y `timer`

@@ -7,7 +7,7 @@ Trabajo Practico Integrador de la materia Paradigmas de Programacion. Armamos un
 - Farchi Juan Gabriel - GitHub: `farchigabriel`
 - Barrientos Valentina - GitHub: `valentinabarrientoss06`
 - Mario Daniel Rodas - GitHub: `mariorodas1804`
-- [Integrante 2] - GitHub: `[usuario]`
+- Acevedo Horacio — GitHub: `acevedoHoracio2026`
 
 
 ## Estructura

@@ -46,7 +46,7 @@ TPI-Funcional-2026-Grupo25/
 
 ## 🔤 Lenguaje Asignado — Fase 3
 
-**Scala**
+### **Scala**
 
 ---
 

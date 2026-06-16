@@ -4,6 +4,7 @@
 
 # Sistema de Semáforos Inteligentes
 **Materia:** Paradigmas y Lenguajes
+
 **Año:** 2026
 
 ---

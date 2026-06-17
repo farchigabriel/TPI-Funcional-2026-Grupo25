@@ -49,5 +49,5 @@ Nos pusimos de acuerdo en algunas cosas al principio para que despues no hubiera
 ## Enlaces
 
 - Repositorio: https://github.com/farchigabriel/TPI-Funcional-2026-Grupo25
-- Video YouTube: [pendiente]
+- Video YouTube: https://youtu.be/snWTiSWKoJI
 - Informe tecnico: [docs/INFORME.md](docs/INFORME.md)
